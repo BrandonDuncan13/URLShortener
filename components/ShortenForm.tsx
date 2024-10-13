@@ -4,12 +4,18 @@ import { useState } from 'react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 
-export default function ShortenForm() {
+interface ShortenFormProps {
+    handleUrlShortened: () => void;
+}
+
+export default function ShortenForm({ handleUrlShortened }: ShortenFormProps) {
     // state for input value
     const [url, setUrl] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsLoading(true);
         
         try {
             const response = await fetch('/api/shorten', {
@@ -20,10 +26,11 @@ export default function ShortenForm() {
             await response.json();
             // reset url value
             setUrl('');
+            handleUrlShortened();
         } catch (error) {
             console.error('Error shortening URL:', error);
         } finally {
-
+            setIsLoading(false);
         }
     }
 
@@ -38,8 +45,8 @@ export default function ShortenForm() {
                     placeholder='Enter URL to shorten'
                     required
                 />
-                <Button className='w-full p-2' type='submit'>
-                    Shorten URL
+                <Button className='w-full p-2' type='submit' disabled={isLoading} >
+                    {isLoading ? 'Shortening...' : 'Shorten URL'}
                 </Button>
             </div>
         </form>
